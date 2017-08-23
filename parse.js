@@ -30,7 +30,6 @@ function getBlockContents(s, startIdx) {
     idx++;
 
     if (idx === s.length) {
-      console.log(s);
       throw new Error('Block not found');
     }
   }
@@ -54,8 +53,6 @@ function parseSequence(s) {
     name = match[1];
 
     idx += match[0].length;
-
-    //console.log('Element in sequence', name);
 
     if (name !== '...') {
       element = parseElement(s.slice(idx));
@@ -135,8 +132,6 @@ function parseElement(s) {
       length
     };
 
-    // console.log('Element', element);
-
     if (ctorOf) {
       const el = parseElement(s.slice(typeRe.lastIndex));
       element.ofElement = el;
@@ -168,30 +163,26 @@ function parseElement(s) {
 
     return element;
   } else {
-    console.log(s);
     throw new Error('could not parse element');
-    //return null;
   }
 }
 
 function parseOpBody(s) {
-  const argRe = /ARGUMENT\s?/g;
-  const resRe = /RESULT\s?/g;
-  //const errRe = /ERRORS\s?/g;
+  const argumentRe = /ARGUMENT\s?/g;
+  const resultRe = /RESULT\s?/g;
   const codeRe = /CODE\s?/g;
 
   let argument = null;
   let result = null;
-  //let errors = null;
   let code = null;
 
-  if (argRe.exec(s)) {
-    argument = parseElement(s.slice(argRe.lastIndex));
+  if (argumentRe.exec(s)) {
+    argument = parseElement(s.slice(argumentRe.lastIndex));
     delete argument.length;
   }
 
-  if (resRe.exec(s)) {
-    result = parseElement(s.slice(resRe.lastIndex));
+  if (resultRe.exec(s)) {
+    result = parseElement(s.slice(resultRe.lastIndex));
     delete result.length;
   }
 
@@ -208,7 +199,6 @@ function parseOpBody(s) {
   return {
     argument,
     result,
-    // errors,
     code
   };
 }

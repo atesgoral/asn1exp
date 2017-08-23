@@ -64,7 +64,7 @@ function parseSequence(s) {
       delete element.length;
 
       let qualifiers = undefined;
-      let optional = false;
+      let optional = undefined;
 
       match = /^((:?\(SIZE\([^)]+\)\)))+?\s?/.exec(s.slice(idx));
 
@@ -121,7 +121,7 @@ function parseElement(s) {
 
   if (match = typeRe.exec(s)) {
     tag = match[1] && parseInt(match[1], 10);
-    implicit = !!match[2];
+    implicit = match[2] && true;
     type = match[3];
     qualifiers = match[4];
     ctorOf = !!match[5];
@@ -176,13 +176,13 @@ function parseElement(s) {
 
 function parseOpBody(s) {
   const argRe = /ARGUMENT\s?/g;
-  const resRe = /RESULT/g;
-  const errRe = /ERRORS/g;
-  const codeRe = /CODE/g;
+  const resRe = /RESULT\s?/g;
+  //const errRe = /ERRORS\s?/g;
+  const codeRe = /CODE\s?/g;
 
   let argument = null;
   let result = null;
-  let errors = null;
+  //let errors = null;
   let code = null;
 
   if (argRe.exec(s)) {
@@ -190,15 +190,25 @@ function parseOpBody(s) {
     delete argument.length;
   }
 
-  // if (resRe.exec(s)) {
-  //   result = parseElement(s.slice(resRe.lastIndex));
-  //   delete result.length;
-  // }
+  if (resRe.exec(s)) {
+    result = parseElement(s.slice(resRe.lastIndex));
+    delete result.length;
+  }
+
+  if (codeRe.exec(s)) {
+    const match = /^local:(\d+)/.exec(s.slice(codeRe.lastIndex));
+
+    if (match) {
+      code = parseInt(match[1], 10);
+    } else {
+      throw new Error('Could not parse code');
+    }
+  }
 
   return {
     argument,
     result,
-    errors,
+    // errors,
     code
   };
 }

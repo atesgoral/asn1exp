@@ -55,16 +55,23 @@ function parseSequence(s) {
 
     idx += match[0].length;
 
-    console.log('Element in sequence', name);
+    //console.log('Element in sequence', name);
 
     if (name !== '...') {
       element = parseElement(s.slice(idx));
 
       idx += element.length;
+      delete element.length;
 
+      let qualifiers = undefined;
       let optional = false;
 
-      // @todo check for qualifiers as well
+      match = /^((:?\(SIZE\([^)]+\)\)))+?\s?/.exec(s.slice(idx));
+
+      if (match) {
+        qualifiers = match[1];
+        idx += match[0].length;
+      }
 
       if (/^OPTIONAL/.test(s.slice(idx))) {
         optional = true;
@@ -88,7 +95,21 @@ function parseSequence(s) {
 }
 
 function parseElement(s) {
-  const typeRe = /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(OCTET STRING|INTEGER|NULL|CHOICE|SEQUENCE|BIT STRING|MAP-EXTENSION)((?:\(SIZE\([^)]+\)\))+|\.\&\w+\(.*?\))?(?:\b(OF\s))?/g;
+  const types = [
+    'OCTET STRING',
+    'INTEGER',
+    'NULL',
+    'BOOLEAN',
+    'NumericString',
+    'SEQUENCE',
+    'CHOICE',
+    'BIT STRING',
+    'ENUMERATED',
+    'MAP-EXTENSION'
+  ];
+
+  let typeRe = /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(TYPE)((?:FROM\(.*?\))?(?:\(SIZE\([^)]+\)\))+|\.\&\w+\(.*?\))?(?:\b(OF\s))?/;
+  typeRe = new RegExp(typeRe.source.replace('TYPE', types.join('|')), 'g');
 
   let match = null;
   let tag = null;
@@ -114,7 +135,7 @@ function parseElement(s) {
       length
     };
 
-    console.log('Element', element);
+    // console.log('Element', element);
 
     if (ctorOf) {
       const el = parseElement(s.slice(typeRe.lastIndex));
@@ -135,6 +156,7 @@ function parseElement(s) {
         break;
 
       case 'BIT STRING':
+      case 'ENUMERATED':
         if (s[typeRe.lastIndex] === '{') {
           let block = getBlockContents(s, typeRe.lastIndex);
           element.length += block.length + 2;
@@ -165,7 +187,13 @@ function parseOpBody(s) {
 
   if (argRe.exec(s)) {
     argument = parseElement(s.slice(argRe.lastIndex));
+    delete argument.length;
   }
+
+  // if (resRe.exec(s)) {
+  //   result = parseElement(s.slice(resRe.lastIndex));
+  //   delete result.length;
+  // }
 
   return {
     argument,
@@ -189,10 +217,14 @@ definitions = definitions
 const opRe = /\b([\w-]+) OPERATION::=/g;
 let match = null;
 
+const operations = {};
+
 while (match = opRe.exec(definitions)) {
   let operationName = match[1];
-  console.log('Parsing operation', operationName);
+
   let operation = parseOpBody(getBlockContents(definitions, opRe.lastIndex));
 
-  console.log(JSON.stringify(operation, null, 2));
+  operations[operationName] = operation;
 }
+
+console.log(JSON.stringify(operations, null, 2));

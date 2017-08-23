@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const getStdin = require('get-stdin');
+
 function getBlockContents(s, startIdx) {
   let nesting = 0;
   let idx = startIdx;
@@ -220,28 +222,32 @@ function parseOpBody(s) {
   };
 }
 
-let definitions = fs.readFileSync('./definitions/MAP-MobileServiceOperations.EXP', 'UTF-8');
+const fileRead = process.argv[2]
+  ? Promise.resolve(fs.readFileSync(process.argv[2], 'UTF-8'))
+  : getStdin();
 
-definitions = definitions
-  .split('\n') // Split into row
-  .filter((row) => !/^--/.test(row)) // Filter out comment rows
-  .join(''); // Join rows
+fileRead.then((definitions) => {
+  definitions = definitions
+    .split('\n') // Split into row
+    .filter((row) => !/^--/.test(row)) // Filter out comment rows
+    .join(''); // Join rows
 
-definitions = definitions
-  .replace(/\s+/g, ' ') // Replace sequental whitespace with a single space
-  .replace(/\B \b|\b \B|\B \B/g, ''); // Replace all space except between words
+  definitions = definitions
+    .replace(/\s+/g, ' ') // Replace sequental whitespace with a single space
+    .replace(/\B \b|\b \B|\B \B/g, ''); // Replace all space except between words
 
-const opRe = /\b([\w-]+) OPERATION::=/g;
-let match = null;
+  const opRe = /\b([\w-]+) OPERATION::=/g;
+  let match = null;
 
-const operations = {};
+  const operations = {};
 
-while (match = opRe.exec(definitions)) {
-  let operationName = match[1];
+  while (match = opRe.exec(definitions)) {
+    let operationName = match[1];
 
-  let operation = parseOpBody(getBlockContents(definitions, opRe.lastIndex));
+    let operation = parseOpBody(getBlockContents(definitions, opRe.lastIndex));
 
-  operations[operationName] = operation;
-}
+    operations[operationName] = operation;
+  }
 
-console.log(JSON.stringify(operations, null, 2));
+  console.log(JSON.stringify(operations, null, 2));
+});

@@ -91,6 +91,24 @@ function parseSequence(s) {
   return elements;
 }
 
+function parseBitString(s) {
+  return s
+    .split(',')
+    .filter((s) => s !== '...')
+    .map((s) => {
+      const match = /^([\w-]+)\((\d+)\)/.exec(s);
+
+      if (!match) {
+        throw new Error('Could not parse bit string value');
+      }
+
+      return {
+        name: match[1],
+        value: parseInt(match[2], 10)
+      };
+    });
+}
+
 function parseElement(s) {
   const types = [
     'OCTET STRING',
@@ -155,8 +173,7 @@ function parseElement(s) {
         if (s[typeRe.lastIndex] === '{') {
           let block = getBlockContents(s, typeRe.lastIndex);
           element.length += block.length + 2;
-          // @todo get values
-          // element.values = parseBitString(block);
+          element.values = parseBitString(block);
         }
       }
     }

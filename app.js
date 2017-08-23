@@ -108,7 +108,7 @@ function parseElement(s) {
     'MAP-EXTENSION'
   ];
 
-  let typeRe = /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(TYPE)((?:FROM\(.*?\))?(?:\(SIZE\([^)]+\)\))+|\.\&\w+\(.*?\))?(?:\b(OF\s))?/;
+  let typeRe = /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(TYPE)\s?((?:FROM\(.*?\))?(?:\(SIZE\([^)]+\)\))+|\.\&\w+\(.*?\))?(?:\b(OF\s))?/;
   typeRe = new RegExp(typeRe.source.replace('TYPE', types.join('|')), 'g');
 
   let match = null;

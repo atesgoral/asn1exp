@@ -144,6 +144,14 @@ function parseElement(s) {
     'MAP-EXTENSION'
   ];
 
+  if (/^TRUE\b/.test(s)) {
+    return {
+      type: 'BOOLEAN',
+      value: true,
+      length: 'TRUE'.length
+    };
+  }
+
   const typeRe = new RegExp(
     /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(TYPE)\s?(QUALIFIER)?(?:\b(OF\s))?/
       .source
@@ -213,6 +221,7 @@ function parseElement(s) {
 
 function parseOpBody(s) {
   const argumentRe = /ARGUMENT\s?/g;
+  const returnResultRe = /RETURN RESULT\s?/g;
   const resultRe = /RESULT\s?/g;
   const codeRe = /CODE\s?/g;
 
@@ -225,7 +234,10 @@ function parseOpBody(s) {
     delete argument.length;
   }
 
-  if (resultRe.exec(s)) {
+  if (returnResultRe.exec(s)) {
+    result = parseElement(s.slice(returnResultRe.lastIndex));
+    delete result.length;
+  } else if (resultRe.exec(s)) {
     result = parseElement(s.slice(resultRe.lastIndex));
     delete result.length;
   }

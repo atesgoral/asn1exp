@@ -2,6 +2,18 @@ const fs = require('fs');
 
 const getStdin = require('get-stdin');
 
+const qualifierRe = /(?:\.\&\w+)?\([^()]*(?:\([^)]*\))*\)/;
+
+function mixin(target, source) {
+  for (var p in source) {
+    if (source[p] !== undefined) {
+      target[p] = source[p];
+    }
+  }
+
+  return target;
+}
+
 function getBlockContents(s, startIdx) {
   let nesting = 0;
   let idx = startIdx;
@@ -65,7 +77,13 @@ function parseSequence(s) {
       let qualifiers = undefined;
       let optional = undefined;
 
-      match = /^((:?\(SIZE\([^)]+\)\)))+?\s?/.exec(s.slice(idx));
+      const postQualifierRe = new RegExp(
+        /^(QUALIFIER)?\s?/
+          .source
+          .replace('QUALIFIER', qualifierRe.source)
+      );
+
+      match = postQualifierRe.exec(s.slice(idx));
 
       if (match) {
         qualifiers = match[1];
@@ -77,10 +95,11 @@ function parseSequence(s) {
         idx += 'OPTIONAL'.length;
       }
 
-      elements.push(Object.assign({
+      elements.push(mixin(element, {
         name,
+        qualifiers,
         optional
-      }, element));
+      }));
     }
 
     if (s[idx] !== ',') {
@@ -125,8 +144,13 @@ function parseElement(s) {
     'MAP-EXTENSION'
   ];
 
-  let typeRe = /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(TYPE)\s?((?:FROM\(.*?\))?(?:\(SIZE\([^)]+\)\))+|\.\&\w+\(.*?\))?(?:\b(OF\s))?/;
-  typeRe = new RegExp(typeRe.source.replace('TYPE', types.join('|')), 'g');
+  const typeRe = new RegExp(
+    /^(?:\[(\d+)\])?(?:(IMPLICIT)\s)?(TYPE)\s?(QUALIFIER)?(?:\b(OF\s))?/
+      .source
+      .replace('TYPE', types.join('|'))
+      .replace('QUALIFIER', qualifierRe.source),
+    'g'
+  );
 
   let match = null;
   let tag = null;
@@ -145,6 +169,7 @@ function parseElement(s) {
     length = match[0].length;
 
     element = {
+      name: undefined, // to hold first position in output
       tag,
       implicit,
       type,

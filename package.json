@@ -1,8 +1,10 @@
 {
   "name": "asn1exp",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Expanded ASN.1 module parser",
-  "keywords": [ "asn.1" ],
+  "keywords": [
+    "asn.1"
+  ],
   "main": "index.js",
   "repository": {
     "type": "git",

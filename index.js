@@ -1,7 +1,3 @@
-const fs = require('fs');
-
-const getStdin = require('get-stdin');
-
 const qualifierRe = /(?:\.\&\w+)?\([^()]*(?:\([^)]*\))*\)/;
 
 function mixin(target, source) {
@@ -259,17 +255,13 @@ function parseOpBody(s) {
   };
 }
 
-const fileRead = process.argv[2]
-  ? Promise.resolve(fs.readFileSync(process.argv[2], 'UTF-8'))
-  : getStdin();
-
-fileRead.then((definitions) => {
-  definitions = definitions
+function parse(s) {
+  s = s
     .split('\n') // Split into row
     .filter((row) => !/^--/.test(row)) // Filter out comment rows
     .join(''); // Join rows
 
-  definitions = definitions
+  s = s
     .replace(/\s+/g, ' ') // Replace sequental whitespace with a single space
     .replace(/\B \b|\b \B|\B \B/g, ''); // Replace all space except between words
 
@@ -278,13 +270,17 @@ fileRead.then((definitions) => {
 
   const operations = {};
 
-  while (match = opRe.exec(definitions)) {
+  while (match = opRe.exec(s)) {
     let operationName = match[1];
 
-    let operation = parseOpBody(getBlockContents(definitions, opRe.lastIndex));
+    let operation = parseOpBody(getBlockContents(s, opRe.lastIndex));
 
     operations[operationName] = operation;
   }
 
-  console.log(JSON.stringify(operations, null, 2));
+  return { operations };
+}
+
+module.exports = Object.freeze({
+  parse
 });

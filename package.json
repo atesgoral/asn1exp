@@ -1,18 +1,14 @@
 {
-  "name": "asn1def-to-json",
+  "name": "asn1exp",
   "version": "0.0.0",
-  "description": "",
+  "description": "Expanded ASN.1 module parser",
+  "keywords": [ "asn.1" ],
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "ssh://git-codecommit.us-east-1.amazonaws.com/v1/repos/util-asn1-definition-parser"
-  },
-  "scripts": {
-    "start": "node index"
+    "url": "ssh://git@github.com:atesgoral/asn1exp.git"
   },
   "author": "Ates Goral <ates@magnetiq.com> (http://magnetiq.com/)",
-  "license": "UNLICENSED",
-  "dependencies": {
-    "get-stdin": "^5.0.1"
-  }
+  "license": "ISC",
+  "dependencies": {}
 }

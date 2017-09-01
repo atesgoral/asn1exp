@@ -1,6 +1,6 @@
 {
   "name": "asn1exp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Expanded ASN.1 module parser",
   "keywords": [
     "asn.1"

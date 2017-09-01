@@ -185,6 +185,7 @@ function parseElement(s) {
       const el = parseElement(s.slice(typeRe.lastIndex));
       element.ofElement = el;
       element.length += el.length;
+      delete el.length;
     } else {
       switch (type) {
       case 'CHOICE':

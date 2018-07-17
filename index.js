@@ -301,16 +301,17 @@ function parse(s) {
   const blocks = {};
 
   while (match = opRe.exec(s)) {
-    let operationErrorName = match[1];
+    let blockName = match[1];
+    let blockType = match[2];
     let block = null;
 
-    if (match[2] === 'OPERATION') {
+    if (blockType === 'OPERATION') {
       block = parseOpBody(getBlockContents(s, opRe.lastIndex));
     } else {
       block = parseErrorBody(getBlockContents(s, opRe.lastIndex));
     }
 
-    blocks[operationErrorName] = block;
+    blocks[blockName] = block;
   }
 
   return { blocks };

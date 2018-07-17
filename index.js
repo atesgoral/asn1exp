@@ -256,6 +256,35 @@ function parseOpBody(s) {
   };
 }
 
+function parseErrorBody(s) {
+  const parameterRe = /PARAMETER\s?/g;
+  const codeRe = /CODE\s?/g;
+
+  let parameter = null;
+  let result = null;
+  let code = null;
+
+  if (parameterRe.exec(s)) {
+    parameter = parseElement(s.slice(parameterRe.lastIndex));
+    delete parameter.length;
+  }
+
+  if (codeRe.exec(s)) {
+    const match = /^local:(\d+)/.exec(s.slice(codeRe.lastIndex));
+
+    if (match) {
+      code = parseInt(match[1], 10);
+    } else {
+      throw new Error('Could not parse code');
+    }
+  }
+
+  return {
+    parameter,
+    code
+  };
+}
+
 function parse(s) {
   s = s
     .split('\n') // Split into row
@@ -266,20 +295,25 @@ function parse(s) {
     .replace(/\s+/g, ' ') // Replace sequental whitespace with a single space
     .replace(/\B \b|\b \B|\B \B/g, ''); // Replace all space except between words
 
-  const opRe = /\b([\w-]+) OPERATION::=/g;
+  const opRe = /\b([\w-]+) (OPERATION|ERROR)::=/g;
   let match = null;
 
-  const operations = {};
+  const blocks = {};
 
   while (match = opRe.exec(s)) {
-    let operationName = match[1];
+    let operationErrorName = match[1];
+    let block = null;
 
-    let operation = parseOpBody(getBlockContents(s, opRe.lastIndex));
+    if (match[2] === 'OPERATION') {
+      block = parseOpBody(getBlockContents(s, opRe.lastIndex));
+    } else {
+      block = parseErrorBody(getBlockContents(s, opRe.lastIndex));
+    }
 
-    operations[operationName] = operation;
+    blocks[operationErrorName] = block;
   }
 
-  return { operations };
+  return { blocks };
 }
 
 module.exports = Object.freeze({

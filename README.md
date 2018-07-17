@@ -2,7 +2,7 @@
 
 ASN.1 expanded module parser. This is not a universal parser. It was specifically made for parsing Expanded ASN.1 modules for Mobile Application Part (MAP) (3GPP TS 29.002) found at http://www.3gpp.org/ftp/specs/archive/29_series/29.002/ASN.1/. It will most likely not work for other expanded ASN.1 modules.
 
-Everything except OPERATION definitions are skipped. For example, the following definition:
+Everything except OPERATION and ERROR definitions are skipped. For example, the following definition:
 
 ```
 updateLocation OPERATION  ::=  {

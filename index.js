@@ -295,20 +295,20 @@ function parse(s) {
     .replace(/\s+/g, ' ') // Replace sequental whitespace with a single space
     .replace(/\B \b|\b \B|\B \B/g, ''); // Replace all space except between words
 
-  const opRe = /\b([\w-]+) (OPERATION|ERROR)::=/g;
+  const blockRe = /\b([\w-]+) (OPERATION|ERROR)::=/g;
   let match = null;
 
   const blocks = {};
 
-  while (match = opRe.exec(s)) {
+  while (match = blockRe.exec(s)) {
     let blockName = match[1];
     let blockType = match[2];
     let block = null;
 
     if (blockType === 'OPERATION') {
-      block = parseOpBody(getBlockContents(s, opRe.lastIndex));
+      block = parseOpBody(getBlockContents(s, blockRe.lastIndex));
     } else {
-      block = parseErrorBody(getBlockContents(s, opRe.lastIndex));
+      block = parseErrorBody(getBlockContents(s, blockRe.lastIndex));
     }
 
     blocks[blockName] = block;
